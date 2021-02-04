@@ -1,3 +1,5 @@
+import "reflect-metadata"; // this shim is required
+import { useExpressServer } from "routing-controllers";
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
@@ -7,14 +9,14 @@ import { config } from "dotenv";
 import bodyParser from "body-parser";
 import rateLimit from "express-rate-limit";
 import logger from "morgan";
-import Cat from "../models/megamind/cat.model";
 
 /* --------------------------------- Runner --------------------------------- */
 config();
 
 /* ------------------------------ Use Database ------------------------------ */
-const kitty = new Cat({ name: "Zildjian" });
-kitty.save().then(() => console.log("meow"));
+// import Cat from "../models/megamind/cat.model";
+// const kitty = new Cat({ name: "Zildjian" });
+// kitty.save().then(() => console.log("meow"));
 
 /* -------------------------------- Constants ------------------------------- */
 const app: express.Application = express();
@@ -31,16 +33,11 @@ app.set("port", port);
 app.set("view engine", "pug");
 
 /* ------------------------------- Middlewares ------------------------------ */
-if (process.env.NODE_ENV !== "development")
-	app.use(
-		helmet({
-			contentSecurityPolicy: {
-				directives: {
-					defaultSrc: ["'self'"],
-				},
-			},
-		})
-	);
+app.use(
+	helmet({
+		contentSecurityPolicy: false,
+	})
+);
 process.env.NODE_ENV !== "development"
 	? app.use(cors())
 	: app.use(cors({ origin: process.env.ORIGIN }));
@@ -50,7 +47,7 @@ app.use(limiter);
 app.use(express.static("public"));
 app.use(logger("dev"));
 
-/* --------------------------------- Router --------------------------------- */
+/* --------------------------------- Socket --------------------------------- */
 app.get("/", (req, res) => {
 	res.render("index");
 });
@@ -61,6 +58,11 @@ io.on("connection", function (socket: any) {
 	socket.on("message", function (message: any) {
 		console.log(message);
 	});
+});
+
+/* --------------------------------- Router --------------------------------- */
+useExpressServer(app, {
+	controllers: [resolve(__dirname + "/**/*.controller.ts")],
 });
 
 server.listen(port, () => console.log(`server is listening on ${port}`));
