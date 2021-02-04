@@ -39,8 +39,8 @@ app.use(
 	})
 );
 process.env.NODE_ENV !== "development"
-	? app.use(cors())
-	: app.use(cors({ origin: process.env.ORIGIN }));
+	? app.use(cors({ origin: process.env.ORIGIN }))
+	: app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(limiter);
@@ -62,7 +62,10 @@ io.on("connection", function (socket: any) {
 
 /* --------------------------------- Router --------------------------------- */
 useExpressServer(app, {
+	// routePrefix: "/api/v1",
 	controllers: [resolve(__dirname + "/**/*.controller.ts")],
+	middlewares: [resolve(__dirname + "/**/*.middleware.ts")],
+	interceptors: [resolve(__dirname + "/**/*.interceptors.ts")],
 });
 
 server.listen(port, () => console.log(`server is listening on ${port}`));

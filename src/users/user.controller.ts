@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { Controller, Req, Res, Get } from "routing-controllers";
+import { JsonController, Req, Res, Get } from "routing-controllers";
 
-@Controller()
+@JsonController("/users")
 export class UserController {
-	@Get("/users")
+	@Get()
 	getAll(@Req() request: Request, @Res() response: Response) {
 		return response.send("Hello response!");
 	}
