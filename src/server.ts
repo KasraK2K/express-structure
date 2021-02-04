@@ -31,15 +31,16 @@ app.set("port", port);
 app.set("view engine", "pug");
 
 /* ------------------------------- Middlewares ------------------------------ */
-app.use(
-	helmet({
-		contentSecurityPolicy: {
-			directives: {
-				defaultSrc: ["'self'"],
+if (process.env.NODE_ENV !== "development")
+	app.use(
+		helmet({
+			contentSecurityPolicy: {
+				directives: {
+					defaultSrc: ["'self'"],
+				},
 			},
-		},
-	})
-);
+		})
+	);
 process.env.NODE_ENV !== "development"
 	? app.use(cors())
 	: app.use(cors({ origin: process.env.ORIGIN }));
