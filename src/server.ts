@@ -2,14 +2,18 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import { Server } from "http";
-import { resolve } from "path";
 import { config } from "dotenv";
 import bodyParser from "body-parser";
 import rateLimit from "express-rate-limit";
 import logger from "morgan";
+import Cat from "../models/megamind/cat.model";
 
 /* --------------------------------- Runner --------------------------------- */
 config();
+
+/* ------------------------------ Use Database ------------------------------ */
+const kitty = new Cat({ name: "Zildjian" });
+kitty.save().then(() => console.log("meow"));
 
 /* -------------------------------- Constants ------------------------------- */
 const app: express.Application = express();
