@@ -1,24 +1,52 @@
-import express from 'express';
-import { Server } from 'http';
+import express from "express";
+import helmet from "helmet";
+import cors from "cors";
+import { Server } from "http";
 import { resolve } from "path";
+import { config } from "dotenv";
+import bodyParser from "body-parser";
+import rateLimit from "express-rate-limit";
+import logger from "morgan";
 
-const app = express();
+/* --------------------------------- Runner --------------------------------- */
+config();
+
+/* -------------------------------- Constants ------------------------------- */
+const app: express.Application = express();
 const server = new Server(app);
 const io = require("socket.io")(server);
-const port = process.env.PORT || 3000;
-
-app.set("port", port);
-
-app.get('/', (req, res) => {
-  res.sendFile(resolve('./client/index.html'));
+const port: number = Number(process.env.PORT || process.env.APPLICATION_PORT);
+const limiter: rateLimit.RateLimit = rateLimit({
+	windowMs: 15 * 60 * 1000,
+	max: 100,
 });
 
-io.on("connection", function(socket: any) {
-  console.log("a user connected");
-  // whenever we receive a 'message' we log it out
-  socket.on("message", function(message: any) {
-    console.log(message);
-  });
+/* ------------------------------- Set Configs ------------------------------ */
+app.set("port", port);
+app.set("view engine", "pug");
+
+/* ------------------------------- Middlewares ------------------------------ */
+app.use(helmet());
+process.env.NODE_ENV !== "development"
+	? app.use(cors())
+	: app.use(cors({ origin: process.env.ORIGIN }));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(limiter);
+app.use(express.static("public"));
+app.use(logger("dev"));
+
+/* --------------------------------- Router --------------------------------- */
+app.get("/", (req, res) => {
+	res.render("index");
+});
+
+io.on("connection", function (socket: any) {
+	console.log("a user connected");
+	// whenever we receive a 'message' we log it out
+	socket.on("message", function (message: any) {
+		console.log(message);
+	});
 });
 
 server.listen(port, () => console.log(`server is listening on ${port}`));
