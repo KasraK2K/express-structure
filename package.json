@@ -4,7 +4,7 @@
 	"description": "Event base fullstack GraphQL CMS",
 	"main": "server.js",
 	"scripts": {
-		"test": "mocha || true",
+		"test:mocha": "mocha tests/**/*.spec.ts || true",
 		"start": "npm run build && node dist/server.js",
 		"start:dev": "nodemon",
 		"build": "rimraf ./dist && tsc"
