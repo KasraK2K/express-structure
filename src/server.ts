@@ -2,6 +2,7 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import { Server } from "http";
+import { resolve } from "path";
 import { config } from "dotenv";
 import bodyParser from "body-parser";
 import rateLimit from "express-rate-limit";
@@ -17,7 +18,7 @@ kitty.save().then(() => console.log("meow"));
 
 /* -------------------------------- Constants ------------------------------- */
 const app: express.Application = express();
-const server = new Server(app);
+const server: Server = new Server(app);
 const io = require("socket.io")(server);
 const port: number = Number(process.env.PORT || process.env.APPLICATION_PORT);
 const limiter: rateLimit.RateLimit = rateLimit({
@@ -30,7 +31,15 @@ app.set("port", port);
 app.set("view engine", "pug");
 
 /* ------------------------------- Middlewares ------------------------------ */
-app.use(helmet());
+app.use(
+	helmet({
+		contentSecurityPolicy: {
+			directives: {
+				defaultSrc: ["'self'"],
+			},
+		},
+	})
+);
 process.env.NODE_ENV !== "development"
 	? app.use(cors())
 	: app.use(cors({ origin: process.env.ORIGIN }));
